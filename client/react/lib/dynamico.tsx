@@ -3,6 +3,7 @@ import { DynamicoClient, DynamicoDevClient, Options, DevOptions } from '@dynamic
 import { Omit } from 'type-fest';
 import { isElement } from 'react-is';
 import { DynamicoContext, DynamicoDevContext } from './DynamicoProvider';
+import { mergeDependencies } from './utils';
 
 const enum ComponentStatus {
   Loading = 'loading',
@@ -76,10 +77,14 @@ export const dynamico = function<T = any>(
         return;
       }
 
+      if (typeof devMode !== 'object') {
+        devMode = {};
+      }
+
       const devClient = new DynamicoDevClient({
-        dependencies: dynamicoClient.dependencies,
-        ...(typeof globalDevMode === 'object' ? globalDevMode : {}),
-        ...(typeof devMode === 'object' ? devMode : {})
+        ...globalDevMode,
+        ...devMode,
+        ...mergeDependencies(dynamicoClient, globalDevMode || {}, devMode)
       });
 
       let usingFallbackComponent = false;

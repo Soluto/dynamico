@@ -101,11 +101,11 @@ describe('Client tests', () => {
             ok: true
           })
         );
-        const mockStroageController = new MockStorageProvider();
+        const mockStorageController = new MockStorageProvider();
 
         const client = new DynamicoClient({
           url,
-          cache: mockStroageController,
+          cache: mockStorageController,
           dependencies: {
             resolvers,
             versions
@@ -155,11 +155,11 @@ describe('Client tests', () => {
             ok: true
           })
         );
-        const mockStroageController = new MockStorageProvider();
+        const mockStorageController = new MockStorageProvider();
 
         const client = new DynamicoClient({
           url,
-          cache: mockStroageController,
+          cache: mockStorageController,
           dependencies: {
             resolvers,
             versions
@@ -219,11 +219,11 @@ describe('Client tests', () => {
           .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
           .mockReturnValueOnce(Promise.resolve(mockGetComponentResponse));
 
-        const mockStroageController = new MockStorageProvider();
+        const mockStorageController = new MockStorageProvider();
 
         const client = new DynamicoClient({
           url,
-          cache: mockStroageController,
+          cache: mockStorageController,
           dependencies: {
             resolvers: {},
             versions
@@ -251,14 +251,14 @@ describe('Client tests', () => {
             ok: false
           };
 
-          const mockStroageController = new MockStorageProvider();
+          const mockStorageController = new MockStorageProvider();
           const mockFetch = jest.fn();
 
           mockFetch.mockRejectedValue(mockRegisterResponse);
 
           const client = new DynamicoClient({
             url,
-            cache: mockStroageController,
+            cache: mockStorageController,
             dependencies: {
               resolvers: {},
               versions
@@ -291,17 +291,16 @@ describe('Client tests', () => {
             ok: false
           };
 
-          const mockStroageController = new MockStorageProvider();
+          const mockStorageController = new MockStorageProvider();
 
-          mockStroageController[`${prefix}/${componentName}/${componentVersion}`] = 'test code';
+          mockStorageController[`${prefix}/${componentName}/${componentVersion}`] = 'test code';
 
           const mockFetch = jest.fn();
           mockFetch.mockRejectedValue(mockRegisterResponse);
 
           const client = new DynamicoClient({
-            prefix,
             url,
-            cache: mockStroageController,
+            cache: { storage: mockStorageController, prefix },
             dependencies: {
               resolvers: {},
               versions
@@ -317,7 +316,7 @@ describe('Client tests', () => {
           await client.get(componentName);
 
           expect(mockFetch).toBeCalledWith(`${url}/host/register`, request);
-          expect(mockStroageController.getItem).toBeCalledWith(`${prefix}/${componentName}/${componentVersion}`);
+          expect(mockStorageController.getItem).toBeCalledWith(`${prefix}/${componentName}/${componentVersion}`);
           expect(consoleWarnSpy).toHaveBeenCalledWith(
             "Couldn't get components index from the registry, working in offline mode"
           );
@@ -341,9 +340,9 @@ describe('Client tests', () => {
             ok: false
           };
 
-          const mockStroageController = new MockStorageProvider();
+          const mockStorageController = new MockStorageProvider();
 
-          mockStroageController[`${prefix}/${componentName}/${componentVersion}`] = 'test code';
+          mockStorageController[`${prefix}/${componentName}/${componentVersion}`] = 'test code';
 
           const mockFetch = jest.fn();
           mockFetch
@@ -352,9 +351,8 @@ describe('Client tests', () => {
             .mockRejectedValue(mockRegisterResponse);
 
           const client = new DynamicoClient({
-            prefix,
             url,
-            cache: mockStroageController,
+            cache: { storage: mockStorageController, prefix },
             dependencies: {
               resolvers: {},
               versions
@@ -415,9 +413,9 @@ describe('Client tests', () => {
             ok: true
           };
 
-          const mockStroageController = new MockStorageProvider();
+          const mockStorageController = new MockStorageProvider();
 
-          mockStroageController[`${prefix}/${componentName}/${componentLocalVersion}`] = 'test code';
+          mockStorageController[`${prefix}/${componentName}/${componentLocalVersion}`] = 'test code';
           let continuteTest;
           const lock = new Promise(resolve => {
             continuteTest = resolve;
@@ -432,9 +430,8 @@ describe('Client tests', () => {
             })
             .mockResolvedValue(mockComponentResponse);
           const client = new DynamicoClient({
-            prefix,
             url,
-            cache: mockStroageController,
+            cache: { storage: mockStorageController, prefix },
             dependencies: {
               resolvers: {},
               versions
@@ -490,12 +487,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageController = new MockStorageProvider();
+      const mockStorageController = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageController,
+        cache: { storage: mockStorageController, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -532,13 +528,12 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageController = new MockStorageProvider();
-      mockStroageController[`${prefix}/${componentName}/${componentVersion}`] = 'new code';
+      const mockStorageController = new MockStorageProvider();
+      mockStorageController[`${prefix}/${componentName}/${componentVersion}`] = 'new code';
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageController,
+        cache: { storage: mockStorageController, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -575,13 +570,12 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
-      mockStroageProvider[`${prefix}/${componentName}/${componentVersion}`] = 'new code';
+      const mockStorageProvider = new MockStorageProvider();
+      mockStorageProvider[`${prefix}/${componentName}/${componentVersion}`] = 'new code';
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -590,7 +584,7 @@ describe('Client tests', () => {
       });
       await client.get(componentName, { componentVersion });
 
-      expect(mockStroageProvider.getItem).toBeCalledWith(`${prefix}/${componentName}/${componentVersion}`);
+      expect(mockStorageProvider.getItem).toBeCalledWith(`${prefix}/${componentName}/${componentVersion}`);
     });
 
     it('should get component code from cache when component name exists in index and exists in cache', async () => {
@@ -626,13 +620,12 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
-      mockStroageProvider[`${prefix}/${componentName}/${componentVersion}`] = 'new code';
+      const mockStorageProvider = new MockStorageProvider();
+      mockStorageProvider[`${prefix}/${componentName}/${componentVersion}`] = 'new code';
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -644,7 +637,7 @@ describe('Client tests', () => {
 
       expect(mockFetch).toBeCalledWith(`${url}/host/register`, request);
       expect(mockFetch).not.toBeCalledWith(`${url}/${componentName}?hostId=${hostId}`);
-      expect(mockStroageProvider.getItem).toBeCalledWith(`${prefix}/${componentName}/${componentVersion}`);
+      expect(mockStorageProvider.getItem).toBeCalledWith(`${prefix}/${componentName}/${componentVersion}`);
     });
 
     it('should get component code from server when component name exists in index and does not exists in cache', async () => {
@@ -680,12 +673,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -732,12 +724,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -777,12 +768,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -791,7 +781,7 @@ describe('Client tests', () => {
       });
       await client.get(componentName);
 
-      expect(mockStroageProvider.setItem).toBeCalledWith(`${prefix}/${componentName}/${componentVersion}`, testCode);
+      expect(mockStorageProvider.setItem).toBeCalledWith(`${prefix}/${componentName}/${componentVersion}`, testCode);
     });
 
     it('throws error when status code if response.ok is false', async () => {
@@ -822,12 +812,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -865,12 +854,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockGetComponentResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -918,12 +906,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -933,7 +920,7 @@ describe('Client tests', () => {
       try {
         await client.get(componentName);
       } catch {
-        expect(mockStroageProvider.setItem).not.toBeCalled();
+        expect(mockStorageProvider.setItem).not.toBeCalled();
       }
     });
 
@@ -966,13 +953,12 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockGetComponentResponse));
 
-      const mockStroageController = new MockStorageProvider();
-      mockStroageController[`${prefix}/${componentName}/${componentVersion}`] = 'new code';
+      const mockStorageController = new MockStorageProvider();
+      mockStorageController[`${prefix}/${componentName}/${componentVersion}`] = 'new code';
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageController,
+        cache: { storage: mockStorageController, prefix },
         dependencies: {
           resolvers: {},
           versions
@@ -1012,12 +998,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {
             dep
@@ -1057,12 +1042,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions: {}
@@ -1104,12 +1088,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions: {}
@@ -1157,12 +1140,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions: {}
@@ -1203,12 +1185,11 @@ describe('Client tests', () => {
         .mockReturnValueOnce(Promise.resolve(mockRegisterResponse))
         .mockReturnValueOnce(Promise.resolve(mockResponse));
 
-      const mockStroageProvider = new MockStorageProvider();
+      const mockStorageProvider = new MockStorageProvider();
 
       const client = new DynamicoClient({
-        prefix,
         url,
-        cache: mockStroageProvider,
+        cache: { storage: mockStorageProvider, prefix },
         dependencies: {
           resolvers: {},
           versions: {}

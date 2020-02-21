@@ -89,7 +89,7 @@ describe('S3Storage', () => {
         }
       };
       const result = {
-        Body: new Buffer(JSON.stringify(expectedIndex), 'utf8')
+        Body: Buffer.from(JSON.stringify(expectedIndex), 'utf8')
       };
       const getObjectResponse = getDefaultReturnValue();
       getObjectResponse.promise.mockResolvedValueOnce(result);
@@ -123,7 +123,7 @@ describe('S3Storage', () => {
       const newIndex = { [newId]: newIndexDefinition };
       const expectedIndex = { ...currentIndex, ...newIndex };
       const result = {
-        Body: new Buffer(JSON.stringify(currentIndex), 'utf8')
+        Body: Buffer.from(JSON.stringify(currentIndex), 'utf8')
       };
       const getObjectResponse = getDefaultReturnValue();
       getObjectResponse.promise.mockResolvedValueOnce(result);
@@ -162,7 +162,7 @@ describe('S3Storage', () => {
       const newIndex = { [existingId]: newIndexDefinition };
 
       const result = {
-        Body: new Buffer(JSON.stringify(currentIndex), 'utf8')
+        Body: Buffer.from(JSON.stringify(currentIndex), 'utf8')
       };
       const getObjectResponse = getDefaultReturnValue();
       getObjectResponse.promise.mockResolvedValueOnce(result);
@@ -250,7 +250,7 @@ describe('S3Storage', () => {
       const listObjectsResponse = { Contents: [{ Key: expectedKey }, { Key: `${comp1}/${version}/main.js` }] };
       const peerDeps = { peerDependencies: { someDep: '1.0.0' } };
       const result = {
-        Body: new Buffer(JSON.stringify(peerDeps), 'utf8')
+        Body: Buffer.from(JSON.stringify(peerDeps), 'utf8')
       };
       const listObjectsV2Response = getDefaultReturnValue();
       listObjectsV2Response.promise.mockResolvedValueOnce(listObjectsResponse);
@@ -468,7 +468,7 @@ describe('S3Storage', () => {
       getObjectResponse.promise.mockResolvedValueOnce(getPackageJsonResponse);
 
       const getComponentCodeResponse = {
-        Body: new Buffer(componentCode, 'utf8')
+        Body: Buffer.from(componentCode, 'utf8')
       };
       const getComponentObjectResponse = getDefaultReturnValue();
       getComponentObjectResponse.promise.mockResolvedValueOnce(getComponentCodeResponse);

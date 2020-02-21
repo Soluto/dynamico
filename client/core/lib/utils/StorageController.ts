@@ -2,11 +2,11 @@ import deepmerge from 'deepmerge';
 import compareVersions from 'compare-versions';
 
 export class StorageController {
-  separator = '/';
+  readonly separator = '/';
 
-  componentTree: Record<string, string[]> = {};
+  readonly componentTree: Record<string, string[]> = {};
 
-  constructor(private prefix: string, private storage: Storage) {
+  constructor(public readonly prefix: string, public readonly storage: Storage) {
     this.componentTree = Object.keys(this.storage)
       .map(key => {
         const [, comp, componentVersion] = key.split(this.separator);

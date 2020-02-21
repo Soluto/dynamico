@@ -2,8 +2,6 @@ import buildUrl from 'build-url';
 import { ComponentGetFailedError, ComponentIntegrityCheckFailed } from './errors';
 import { StorageController } from './utils/StorageController';
 
-export type Dependencies = Record<string, string>;
-
 export interface Mismatches {
   [dependency: string]: {
     host: string;
@@ -29,14 +27,16 @@ interface FailedRegisterPolicy {
   strategy: FailedRegisterStrategy;
 }
 
+export type CacheOptions = StorageController | Storage | { storage: Storage; prefix?: string };
+export type Dependencies = {
+  versions: Record<string, string>;
+  resolvers: Record<string, any>;
+};
+
 export interface InitOptions {
-  prefix?: string;
   url: string;
-  cache: Storage;
-  dependencies: {
-    versions: Dependencies;
-    resolvers: Record<string, any>;
-  };
+  cache: CacheOptions;
+  dependencies: Dependencies;
   fetcher?: WindowOrWorkerGlobalScope['fetch'];
   globals?: Record<string, any>;
   checkCodeIntegrity?: (code: string) => Promise<boolean>;
@@ -62,37 +62,54 @@ const enum ReadyState {
   OfflineIgnore
 }
 
+export const filterDependencies = ({ resolvers, versions }: Dependencies): Dependencies => {
+  const names = Object.keys(resolvers).filter(name => {
+    if (versions[name]) {
+      return true;
+    }
+
+    console.warn(`Missing version specifier for ${name}`);
+    return false;
+  });
+
+  return {
+    versions: names.reduce((sum, name) => ({ ...sum, [name]: versions[name] }), {}),
+    resolvers: names.reduce((sum, name) => ({ ...sum, [name]: resolvers[name] }), {})
+  };
+};
+
 export class DynamicoClient {
   id: string = '';
   url: string;
-  dependencies: {
-    versions: Dependencies;
-    resolvers: Record<string, any>;
-  };
+  dependencies: Dependencies;
   cache: StorageController;
   fetcher: WindowOrWorkerGlobalScope['fetch'];
   globals: Record<string, any>;
   index: Record<string, string> = {};
   checkCodeIntegrity?: (string) => Promise<boolean>;
+  failedRegisterPolicy: FailedRegisterPolicy;
   private readyState: ReadyState = ReadyState.Initializing;
   private requestQueue: Function[] = [];
 
   constructor(options: InitOptions) {
     this.url = options.url;
-    this.cache = new StorageController(options.prefix || '@dynamico', options.cache);
-    this.dependencies = options.dependencies;
+    this.cache =
+      options.cache instanceof StorageController
+        ? options.cache
+        : new StorageController(options.cache.prefix || '@dynamico', options.cache.storage || options.cache);
+    this.dependencies = filterDependencies(options.dependencies);
     this.globals = options.globals || {};
     this.checkFetcher(options.fetcher);
 
     this.fetcher = options.fetcher || fetch.bind(window);
     this.checkCodeIntegrity = options.checkCodeIntegrity;
-    const failedRegisterPolicy = options.failedRegisterPolicy
+    this.failedRegisterPolicy = options.failedRegisterPolicy
       ? {
           ...options.failedRegisterPolicy,
           retries: Math.max(options.failedRegisterPolicy.retries, 0)
         }
       : { retries: 0, retryRate: 0, strategy: FailedRegisterStrategy.Ignore };
-    this.initialize(failedRegisterPolicy);
+    this.initialize(this.failedRegisterPolicy);
   }
 
   private handleIssues(issues: Issues): void {
@@ -120,20 +137,7 @@ export class DynamicoClient {
     }
   }
 
-  private filterMissingDependencies({ versions, resolvers }: DynamicoClient['dependencies']): Dependencies {
-    return Object.keys(resolvers).reduce((sum, name) => {
-      if (!versions[name]) {
-        console.warn(`Missing version specifier for ${name}`);
-      }
-
-      return {
-        ...sum,
-        ...(versions[name] ? { [name]: versions[name] } : undefined)
-      };
-    }, {});
-  }
-
-  private async register(dependencies: Dependencies): Promise<RegisterHostResponse> {
+  private async register(): Promise<RegisterHostResponse> {
     const url = buildUrl(this.url, {
       path: '/host/register'
     });
@@ -143,7 +147,7 @@ export class DynamicoClient {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(dependencies)
+      body: JSON.stringify(this.dependencies.versions)
     }).then((res: Response) => res.json());
   }
 
@@ -187,9 +191,9 @@ export class DynamicoClient {
     return code;
   }
 
-  private async initialize(policy: FailedRegisterPolicy, versions = this.filterMissingDependencies(this.dependencies)) {
+  private async initialize(policy: FailedRegisterPolicy) {
     try {
-      const { id, issues, index }: RegisterHostResponse = await this.register(versions);
+      const { id, issues, index }: RegisterHostResponse = await this.register();
       this.id = id;
       this.index = index || {};
 
@@ -216,13 +220,10 @@ export class DynamicoClient {
 
       if (policy.retries) {
         setTimeout(() => {
-          this.initialize(
-            {
-              ...policy,
-              retries: policy.retries - 1
-            },
-            versions
-          );
+          this.initialize({
+            ...policy,
+            retries: policy.retries - 1
+          });
         }, policy.retryRate);
       }
     }
@@ -253,10 +254,6 @@ export class DynamicoClient {
 
     new Function(...Object.keys(args), code)(...Object.values(args));
 
-    if (module.exports) {
-      return module.exports;
-    }
-
-    return exports.default;
+    return module.exports || exports.default;
   }
 }
