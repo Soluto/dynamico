@@ -65,7 +65,7 @@
     "tar": "^4.4.8",
     "ts-node": "^8.6.2",
     "typescript": "^3.3.3333",
-    "update-notifier": "^2.5.0",
+    "update-notifier": "^4.0.0",
     "uppercamelcase": "^3.0.0",
     "url-join": "^4.0.0",
     "winston": "^3.2.1"
