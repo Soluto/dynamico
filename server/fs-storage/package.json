@@ -30,7 +30,7 @@
   "dependencies": {
     "@dynamico/common-types": "^0.0.1-alpha.10",
     "klaw-sync": "^6.0.0",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^1.0.0"
   },
   "devDependencies": {
     "@types/fs-extra": "^5.0.5",
