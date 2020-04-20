@@ -73,6 +73,11 @@ export default (plop: Plop) => {
         path: '{{path}}/dcmconfig.{{language}}',
         templateFile: 'plop/component/{{framework}}/dcmconfig.hbs'
       },
+      {
+        type: 'add',
+        path: '{{path}}/.gitignore',
+        templateFile: 'plop/component/{{framework}}/gitignore.hbs'
+      },
       ...(data.language === 'ts'
         ? [
             {
