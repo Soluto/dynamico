@@ -46,7 +46,7 @@
     "copyfiles": "^2.1.0"
   },
   "dependencies": {
-    "bili": "^4.5.2",
+    "bili": "^4.9.1",
     "caporal": "^1.1.0",
     "cors": "^2.8.5",
     "cosmiconfig": "^6.0.0",
