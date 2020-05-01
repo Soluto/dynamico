@@ -24,7 +24,9 @@
   "scripts": {
     "plop": "plop",
     "copy:hbs": "copyfiles plop/**/*.hbs dist/",
-    "build": "rm -rf dist && tsc && npm run copy:hbs"
+    "build": "rm -rf dist && tsc && npm run copy:hbs",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "bugs": {
     "url": "https://github.com/soluto/dynamico/issues"
@@ -68,6 +70,8 @@
     "update-notifier": "^2.5.0",
     "uppercamelcase": "^3.0.0",
     "url-join": "^4.0.0",
-    "winston": "^3.2.1"
-  }
+    "winston": "^3.2.1",
+    "snyk": "^1.316.1"
+  },
+  "snyk": true
 }
