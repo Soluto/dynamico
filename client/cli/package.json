@@ -54,7 +54,7 @@
     "express": "^4.17.1",
     "form-data": "^2.3.3",
     "glob": "^7.1.6",
-    "node-fetch": "^2.3.0",
+    "node-fetch": "^2.6.1",
     "p-try": "^2.0.0",
     "plop": "^2.3.0",
     "promisepipe": "^3.0.0",
